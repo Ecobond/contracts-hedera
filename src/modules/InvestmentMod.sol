@@ -47,6 +47,11 @@ contract InvestmentMod is ERC4626, OwnableRoles {
     /// @dev Hook that is called after any deposit or mint.
     function _afterDeposit(uint256 assets, uint256 shares) internal virtual override {}
 
+    function approve(address spender, uint256 amount) public virtual override returns (bool) {
+        if (spender == address(0)) revert ZeroAddress();
+        return super.approve(spender, amount);
+    }
+
     function transfer(address to, uint256 amount) public virtual override returns (bool) {
         if (to == address(0)) revert ZeroAddress();
         return super.transfer(to, amount);
