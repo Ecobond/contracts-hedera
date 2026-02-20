@@ -66,19 +66,19 @@ contract InvestmentMod is ERC4626, OwnableRoles {
     //                                 OVERRIDES
     //////////////////////////////////////////////////////////////////////////*//
 
-    function approve(address spender, uint256 amount) public virtual override returns (bool) {
-        if (spender == address(0)) revert ZeroAddress();
-        return super.approve(spender, amount);
+    function approve(address _spender, uint256 _amount) public virtual override returns (bool) {
+        if (_spender == address(0)) revert ZeroAddress();
+        return super.approve(_spender, _amount);
     }
 
-    function transfer(address to, uint256 amount) public virtual override returns (bool) {
-        if (to == address(0)) revert ZeroAddress();
-        return super.transfer(to, amount);
+    function transfer(address _to, uint256 _amount) public virtual override returns (bool) {
+        if (_to == address(0)) revert ZeroAddress();
+        return super.transfer(_to, _amount);
     }
 
-    function transferFrom(address from, address to, uint256 amount) public virtual override returns (bool) {
-        if (from == address(0) || to == address(0)) revert ZeroAddress();
-        return super.transferFrom(from, to, amount);
+    function transferFrom(address _from, address _to, uint256 _amount) public virtual override returns (bool) {
+        if (_from == address(0) || _to == address(0)) revert ZeroAddress();
+        return super.transferFrom(_from, _to, _amount);
     }
 
     /// @dev Returns the number of decimals of the underlying asset.
