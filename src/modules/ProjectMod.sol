@@ -7,8 +7,8 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {Ownable} from "solady/auth/Ownable.sol";
 
-event ProjectUpdated(uint256 projectId, string projectURI);
-event CreEntrypointUpdated(address creEntrypoint);
+event ProjectUpdated(uint256 projectId, string projectURI, ImpactScore impactScore);
+event CreEntrypointSet(address creEntrypoint);
 error NotCreEntrypoint();
 
 contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod {
@@ -42,18 +42,18 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
 
     function setCreEntrypointAddress(address _creEndpoint) external onlyOwner {
         creEndpoint = _creEndpoint;
-        emit CreEntrypointUpdated(_creEndpoint);
     }
 
     function getCreEntrypointAddress() external view returns (address) {
         return creEndpoint;
+        emit CreEntrypointSet(_creEndpoint);
     }
 
     function createProject(string calldata _projectURI) external returns (uint256 projectId_) {
         projectId_ = totalSupply() + 1;
         _mint(_msgSender(), projectId_);
         _setTokenURI(projectId_, _projectURI);
-        emit ProjectUpdated(projectId_, _projectURI);
+        emit ProjectUpdated(projectId_, _projectURI, ImpactScore(0, 0));
     }
 
     function updateProjects(uint256[] calldata _projectIds, string[] calldata _projectURIs) external onlyCRE {
@@ -115,6 +115,6 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     //////////////////////////////////////////////////////////////////////////*//
 
         _setTokenURI(_projectId, _projectURI);
-        emit ProjectUpdated(_projectId, _projectURI);
+        emit ProjectUpdated(_projectId, _projectURI, _impactScore);
     }
 }
