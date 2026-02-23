@@ -17,6 +17,7 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     //////////////////////////////////////////////////////////////////////////*//
 
     address private creEndpoint;
+    mapping(uint256 => ImpactScore) private projectScores;
 
     //*//////////////////////////////////////////////////////////////////////////
     //                                CONSTRUCTOR
