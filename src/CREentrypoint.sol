@@ -1,22 +1,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IProject} from "./interfaces/IProject.sol";
+import {IProjectMod, ProjectDetails} from "./interfaces/IProjectMod.sol";
 import {ReceiverTemplate} from "./libraries/ReceiverTemplate.sol";
 
 contract CREentrypoint is ReceiverTemplate {
-    IProject private project;
+    IProjectMod private project;
 
     constructor(address _forwarderAddress, address _projectAddress) ReceiverTemplate(_forwarderAddress) {
-        project = IProject(_projectAddress);
+        project = IProjectMod(_projectAddress);
     }
 
-    function getProjectAddress() external view returns (IProject) {
+    function getProjectAddress() external view returns (IProjectMod) {
         return project;
     }
 
-    function _processReport(bytes calldata report) internal virtual override {
-        (uint256[] memory projectIds, string[] memory projectURIs) = abi.decode(report, (uint256[], string[]));
-        project.updateProjects(projectIds, projectURIs);
+    function _processReport(bytes calldata _report) internal virtual override {
+        project.updateProjects(_decodeReport(_report));
+    }
+
+    function _decodeReport(bytes calldata _report) internal pure returns (ProjectDetails[] memory) {
+        return abi.decode(_report, (ProjectDetails[]));
     }
 }
