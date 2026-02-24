@@ -9,6 +9,7 @@ import {Ownable} from "solady/auth/Ownable.sol";
 
 event ProjectUpdated(uint256 projectId, string projectURI, ImpactScore impactScore);
 event CreEntrypointSet(address creEntrypoint);
+event Whitelisted(address indexed account, bool status);
 error NotCreEntrypoint();
 error NotWhitelisted();
 
