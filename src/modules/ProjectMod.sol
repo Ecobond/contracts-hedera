@@ -7,9 +7,12 @@ import {ERC721Enumerable} from "@openzeppelin/contracts/token/ERC721/extensions/
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import {Ownable} from "solady/auth/Ownable.sol";
 
-event ProjectUpdated(uint256 projectId, string projectURI, ImpactScore impactScore);
-event CreEntrypointSet(address creEntrypoint);
+event ProjectUpdated(uint256 indexed projectId, string projectURI, ImpactScore impactScore);
+event CreEntrypointSet(address indexed creEntrypoint);
+event Whitelisted(address indexed account, bool status);
+
 error NotCreEntrypoint();
+error NotWhitelisted();
 
 contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod {
     //*//////////////////////////////////////////////////////////////////////////
@@ -18,6 +21,7 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
 
     address private creEndpoint;
     mapping(uint256 => ImpactScore) private projectScores;
+    mapping(address => bool) private whitelist;
 
     //*//////////////////////////////////////////////////////////////////////////
     //                                CONSTRUCTOR
@@ -36,6 +40,11 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
         _;
     }
 
+    modifier onlyWhitelisted() {
+        if (!whitelist[_msgSender()]) revert NotWhitelisted();
+        _;
+    }
+
     //*//////////////////////////////////////////////////////////////////////////
     //                             EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*//
@@ -45,7 +54,11 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
         emit CreEntrypointSet(_creEndpoint);
     }
 
-    function createProject(string calldata _projectURI) external returns (uint256 projectId_) {
+    function setWhitelist(address _account, bool _status) external onlyOwner {
+        whitelist[_account] = _status;
+    }
+
+    function createProject(string calldata _projectURI) external onlyWhitelisted returns (uint256 projectId_) {
         projectId_ = totalSupply() + 1;
         _mint(_msgSender(), projectId_);
         _setTokenURI(projectId_, _projectURI);
