@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import {IERC721} from "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
 /// @notice The impact score of a project.
 struct ImpactScore {
     uint8 creditQuality; // 0 - 100 (financial risk)
@@ -17,7 +19,7 @@ struct ProjectDetails {
     string projectURI;
 }
 
-interface IProjectMod {
+interface IProjectMod is IERC721 {
     /// @notice Creates a new project.
     /// @param projectURI The URI of the project.
     /// @return projectId The ID of the created project.
