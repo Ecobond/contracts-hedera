@@ -65,10 +65,8 @@ contract CREentrypointTest is Test {
         assertEq(score.greenImpact, 90);
     }
 
-    function test_SupportsInterface() public {
+    function test_SupportsInterface() public view {
         bytes4 ireceiverInterface = type(IReceiver).interfaceId;
         assertTrue(creEntrypoint.supportsInterface(ireceiverInterface));
     }
 }
-
-import {IReceiver} from "../src/interfaces/IReceiver.sol";
