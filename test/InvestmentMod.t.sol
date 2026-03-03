@@ -4,26 +4,13 @@ pragma solidity ^0.8.0;
 import {InvestmentMod} from "../src/InvestmentMod.sol";
 import {ProjectMod} from "../src/ProjectMod.sol";
 import {IProjectMod} from "../src/interfaces/IProjectMod.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {USDCMock} from "../test/mock/MockUSDC.sol";
 import {Test} from "forge-std/Test.sol";
-
-// Simple ERC20 mock for testing
-contract MockUSDC is ERC20 {
-    constructor() ERC20("USDC", "USDC") {}
-
-    function mint(address to, uint256 amount) public {
-        _mint(to, amount);
-    }
-
-    function decimals() public pure override returns (uint8) {
-        return 6;
-    }
-}
 
 contract InvestmentModTest is Test {
     InvestmentMod public investmentMod;
     ProjectMod public projectMod;
-    MockUSDC public usdc;
+    USDCMock public usdc;
     address public owner;
     address public issuer;
     address public investor;
@@ -36,14 +23,19 @@ contract InvestmentModTest is Test {
         projectOwner = makeAddr("projectOwner");
 
         // Deploy mock USDC
-        usdc = new MockUSDC();
+        usdc = new USDCMock();
 
         // Deploy ProjectMod
         vm.prank(owner);
         projectMod = new ProjectMod(owner);
 
         // Deploy InvestmentMod - note: owner must be the issuer to grant roles
-        investmentMod = new InvestmentMod(issuer, address(projectMod), address(usdc));
+        investmentMod = new InvestmentMod(owner, address(projectMod), address(usdc));
+
+        // Setup investmentMod issuer role
+        uint256 issuerRole = investmentMod.ISSUER_ROLE();
+        vm.prank(owner);
+        investmentMod.grantRoles(issuer, issuerRole);
 
         // Mint USDC to investment mod
         usdc.mint(address(investmentMod), 1000000e6);
@@ -54,11 +46,11 @@ contract InvestmentModTest is Test {
         projectMod.setWhitelist(projectOwner, true);
     }
 
-    function test_InvestmentModName() public {
+    function test_InvestmentModName() public view {
         assertEq(investmentMod.name(), "Ecobond Shares");
     }
 
-    function test_InvestmentModSymbol() public {
+    function test_InvestmentModSymbol() public view {
         assertEq(investmentMod.symbol(), "EBS");
     }
 
@@ -72,18 +64,22 @@ contract InvestmentModTest is Test {
         // Create a project
         vm.prank(projectOwner);
         uint256 projectId = projectMod.createProject("ipfs://QmProject1");
-
-        // The investmentMod asset is hardcoded to USDC address,
-        // so we need to test the structure even though the actual token won't match
         uint256 fundAmount = 100000e6;
+
+        // Approve investmentMod to spend its own USDC (needed for trySafeTransferFrom)
+        vm.prank(address(investmentMod));
+        usdc.approve(address(investmentMod), type(uint256).max);
 
         // Record the project owner's balance before
         uint256 balanceBefore = usdc.balanceOf(projectOwner);
 
-        // Fund the project (this will revert due to asset mismatch, which is expected for this test setup)
-        // In production, the USDC address would be correct and this would work
+        vm.prank(issuer);
+        investmentMod.fundProject(projectId, fundAmount);
 
-        assertEq(investmentMod.projectInvestments(projectId), 0);
+        uint256 balanceAfter = usdc.balanceOf(projectOwner);
+
+        assertEq(balanceAfter, balanceBefore + fundAmount);
+        assertEq(investmentMod.projectInvestments(projectId), fundAmount);
     }
 
     function test_TotalAssets() public {
@@ -91,10 +87,7 @@ contract InvestmentModTest is Test {
         assertGe(initialAssets, 0);
     }
 
-    function test_InvestorRoles() public {
-        uint256 role = investmentMod.ISSUER_ROLE();
-        vm.prank(issuer);
-        investmentMod.grantRoles(issuer, role);
-        assertTrue(investmentMod.hasAnyRole(issuer, role));
+    function test_InvestorRoles() public view {
+        assertTrue(investmentMod.hasAnyRole(issuer, investmentMod.ISSUER_ROLE()));
     }
 }

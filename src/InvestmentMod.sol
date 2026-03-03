@@ -59,7 +59,20 @@ contract InvestmentMod is ERC4626, OwnableRoles {
     }
 
     function totalAssets() public view virtual override returns (uint256) {
-        return super.totalAssets() + totalInvestments;
+        return super.totalAssets() + totalInvestments + getExpectedReturns();
+    }
+
+    /// @dev Computes expected returns across all funded projects based on their impact scores.
+    /// Formula: expectedReturn = investment * (creditQuality + greenImpact) / 200
+    function getExpectedReturns() public view returns (uint256 expectedReturns_) {
+        uint256 length = PROJECT_MOD.totalSupply();
+        for (uint256 i; i < length; ++i) {
+            uint256 investment = projectInvestments[i + 1];
+            if (investment > 0) {
+                ImpactScore memory score = PROJECT_MOD.getProjectScore(i + 1);
+                expectedReturns_ += (investment * (uint256(score.creditQuality) + uint256(score.greenImpact))) / 200;
+            }
+        }
     }
 
     //*//////////////////////////////////////////////////////////////////////////

@@ -117,6 +117,10 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
         return super.supportsInterface(interfaceId);
     }
 
+    function totalSupply() public view virtual override(ERC721Enumerable, IProjectMod) returns (uint256) {
+        return ERC721Enumerable.totalSupply();
+    }
+
     //*//////////////////////////////////////////////////////////////////////////
     //                             INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*//
