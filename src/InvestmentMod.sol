@@ -101,10 +101,10 @@ contract InvestmentMod is ERC4626, OwnableRoles {
     /// @return expectedReturns_ The aggregate expected returns across all projects.
     function getExpectedReturns() public view returns (uint256 expectedReturns_) {
         uint256 length = PROJECT_MOD.totalSupply();
-        for (uint256 i; i < length; ++i) {
-            uint256 investment = projectInvestments[i + 1];
+        for (uint256 i = 1; i <= length; ++i) {
+            uint256 investment = projectInvestments[i];
             if (investment > 0) {
-                ImpactScore memory score = PROJECT_MOD.getProjectScore(i + 1);
+                ImpactScore memory score = PROJECT_MOD.getProjectScore(i);
                 expectedReturns_ += (investment * (uint256(score.creditQuality) + uint256(score.greenImpact))) / 200;
             }
         }
