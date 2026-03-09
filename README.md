@@ -216,6 +216,15 @@ script/
 
 ---
 
+## Contract Addresses
+
+- ProjectMod - [0xA6c6D93C2c7393Eb91903eE5ed804c6350d1CBb0](https://sepolia.etherscan.io/address/0xA6c6D93C2c7393Eb91903eE5ed804c6350d1CBb0#code)
+- CREentrypoint - [0xE1B4C15D27Ae552FAF14A08C3b27DD46E780EA0F](https://sepolia.etherscan.io/address/0xE1B4C15D27Ae552FAF14A08C3b27DD46E780EA0F#code)
+- InvestmentMod - [0x95e8136a95eDD41EEE8d2b2Eb9FA4E6216927378](https://sepolia.etherscan.io/address/0x95e8136a95eDD41EEE8d2b2Eb9FA4E6216927378#code)
+- USDCMock - [0x395a1CDC2254c13F543c7E5728674D76A264b5B9](https://sepolia.etherscan.io/address/0x395a1CDC2254c13F543c7E5728674D76A264b5B9#code)
+
+---
+
 ## Dependencies
 
 - [OpenZeppelin Contracts](https://github.com/OpenZeppelin/openzeppelin-contracts) — ERC721, ERC20
