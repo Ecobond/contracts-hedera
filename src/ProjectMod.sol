@@ -12,17 +12,17 @@ import {Ownable} from "solady/auth/Ownable.sol";
 /// @param impactScore The updated impact score of the project.
 event ProjectUpdated(uint256 indexed projectId, string projectURI, ImpactScore impactScore);
 
-/// @notice Emitted when the CRE entrypoint address is changed.
-/// @param creEntrypoint The new CRE entrypoint address.
-event CreEntrypointSet(address indexed creEntrypoint);
+/// @notice Emitted when the Ecobond Oracle address is changed.
+/// @param ecobondOracle The new Ecobond Oracle address.
+event EcobondOracleSet(address indexed ecobondOracle);
 
 /// @notice Emitted when an address is added to or removed from the whitelist.
 /// @param account The affected address.
 /// @param status True if whitelisted, false if removed.
 event Whitelisted(address indexed account, bool status);
 
-/// @notice Thrown when a function restricted to the CRE entrypoint is called by another address.
-error NotCreEntrypoint();
+/// @notice Thrown when a function restricted to the Ecobond Oracle is called by another address.
+error NotEcobondOracle();
 
 /// @notice Thrown when a non-whitelisted address attempts to create a project.
 error NotWhitelisted();
@@ -38,7 +38,7 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     //////////////////////////////////////////////////////////////////////////*//
 
     /// @notice The address of the CRE entrypoint authorized to update project scores.
-    address private creEndpoint;
+    address private ecobondOracle;
 
     /// @notice Mapping from project ID to its impact score.
     mapping(uint256 => ImpactScore) private projectScores;
@@ -60,9 +60,9 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     //                                 MODIFIERS
     //////////////////////////////////////////////////////////////////////////*//
 
-    /// @dev Restricts access to the CRE entrypoint address.
-    modifier onlyCRE() {
-        if (_msgSender() != creEndpoint) revert NotCreEntrypoint();
+    /// @dev Restricts access to the Ecobond Oracle address.
+    modifier onlyEcobondOracle() {
+        if (_msgSender() != ecobondOracle) revert NotEcobondOracle();
         _;
     }
 
@@ -76,12 +76,12 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     //                             EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*//
 
-    /// @notice Sets the CRE entrypoint address authorized to update projects.
+    /// @notice Sets the Ecobond Oracle address authorized to update projects.
     /// @dev Only callable by the contract owner.
-    /// @param _creEndpoint The address of the CRE entrypoint contract.
-    function setCreEntrypointAddress(address _creEndpoint) external onlyOwner {
-        creEndpoint = _creEndpoint;
-        emit CreEntrypointSet(_creEndpoint);
+    /// @param _ecobondOracle The address of the Ecobond Oracle contract.
+    function setEcobondOracleAddress(address _ecobondOracle) external onlyOwner {
+        ecobondOracle = _ecobondOracle;
+        emit EcobondOracleSet(_ecobondOracle);
     }
 
     /// @notice Adds or removes an address from the project creation whitelist.
@@ -107,17 +107,17 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     /// @notice Batch updates the impact scores and metadata of existing projects.
     /// @dev Only callable by the CRE entrypoint.
     /// @param _projectDetails An array of ProjectDetails containing new scores and URIs.
-    function updateProjects(ProjectDetails[] calldata _projectDetails) external onlyCRE {
+    function updateProjects(ProjectDetails[] calldata _projectDetails) external onlyEcobondOracle {
         uint256 length = _projectDetails.length;
         for (uint256 i; i < length; ++i) {
             _updateProject(_projectDetails[i].projectId, _projectDetails[i].projectURI, _projectDetails[i].impactScore);
         }
     }
 
-    /// @notice Returns the address of the CRE entrypoint contract.
-    /// @return The CRE entrypoint address.
-    function getCreEntrypointAddress() external view returns (address) {
-        return creEndpoint;
+    /// @notice Returns the address of the Ecobond Oracle contract.
+    /// @return The Ecobond Oracle address.
+    function getEcobondOracleAddress() external view returns (address) {
+        return ecobondOracle;
     }
 
     /// @notice Returns the impact score of a specific project.
@@ -157,23 +157,23 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     }
 
     /// @notice Returns the URI for a given token ID.
-    /// @param tokenId The ID of the token.
+    /// @param _tokenId The ID of the token.
     /// @return The token's metadata URI.
-    function tokenURI(uint256 tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
-        return ERC721URIStorage.tokenURI(tokenId);
+    function tokenURI(uint256 _tokenId) public view virtual override(ERC721, ERC721URIStorage) returns (string memory) {
+        return ERC721URIStorage.tokenURI(_tokenId);
     }
 
     /// @notice Checks if the contract supports a given interface.
-    /// @param interfaceId The interface identifier to check.
+    /// @param _interfaceId The interface identifier to check.
     /// @return True if the interface is supported.
-    function supportsInterface(bytes4 interfaceId)
+    function supportsInterface(bytes4 _interfaceId)
         public
         view
         virtual
         override(IERC165, ERC721Enumerable, ERC721URIStorage)
         returns (bool)
     {
-        return super.supportsInterface(interfaceId);
+        return super.supportsInterface(_interfaceId);
     }
 
     /// @notice Returns the total number of project tokens in circulation.
@@ -187,18 +187,18 @@ contract ProjectMod is ERC721Enumerable, ERC721URIStorage, Ownable, IProjectMod 
     //////////////////////////////////////////////////////////////////////////*//
 
     /// @dev Overrides ERC721 and ERC721Enumerable _update to maintain enumeration.
-    function _update(address to, uint256 tokenId, address auth)
+    function _update(address _to, uint256 _tokenId, address _auth)
         internal
         virtual
         override(ERC721, ERC721Enumerable)
         returns (address)
     {
-        return ERC721Enumerable._update(to, tokenId, auth);
+        return ERC721Enumerable._update(_to, _tokenId, _auth);
     }
 
     /// @dev Overrides ERC721 and ERC721Enumerable _increaseBalance to maintain enumeration.
-    function _increaseBalance(address account, uint128 amount) internal virtual override(ERC721, ERC721Enumerable) {
-        ERC721Enumerable._increaseBalance(account, amount);
+    function _increaseBalance(address _account, uint128 _amount) internal virtual override(ERC721, ERC721Enumerable) {
+        ERC721Enumerable._increaseBalance(_account, _amount);
     }
 
     //*//////////////////////////////////////////////////////////////////////////

@@ -10,20 +10,20 @@ contract ProjectModTest is Test {
     address public owner;
     address public user1;
     address public user2;
-    address public creEndpoint;
+    address public ecobondOracle;
 
     function setUp() public {
         owner = makeAddr("owner");
         user1 = makeAddr("user1");
         user2 = makeAddr("user2");
-        creEndpoint = makeAddr("creEndpoint");
+        ecobondOracle = makeAddr("ecobondOracle");
 
         vm.prank(owner);
         projectMod = new ProjectMod(owner);
 
         // Set up CRE endpoint
         vm.prank(owner);
-        projectMod.setCreEntrypointAddress(creEndpoint);
+        projectMod.setEcobondOracleAddress(ecobondOracle);
 
         // Whitelist users
         vm.prank(owner);
@@ -68,7 +68,7 @@ contract ProjectModTest is Test {
         ProjectDetails[] memory projectDetails = new ProjectDetails[](1);
         projectDetails[0] = ProjectDetails(newScore, projectId, "ipfs://QmProject1Updated");
 
-        vm.prank(creEndpoint);
+        vm.prank(ecobondOracle);
         projectMod.updateProjects(projectDetails);
 
         ImpactScore memory score = projectMod.getProjectScore(projectId);
@@ -90,7 +90,7 @@ contract ProjectModTest is Test {
         projectDetails[0] = ProjectDetails(newScore1, projectId1, "ipfs://QmProject1Updated");
         projectDetails[1] = ProjectDetails(newScore2, projectId2, "ipfs://QmProject2Updated");
 
-        vm.prank(creEndpoint);
+        vm.prank(ecobondOracle);
         projectMod.updateProjects(projectDetails);
 
         ImpactScore[] memory scores = projectMod.getProjectScores();

@@ -25,9 +25,9 @@ struct ProjectDetails {
 /// @notice Interface for the Ecobond project registry.
 /// @dev Each project is represented as an ERC721 token with associated impact scores and metadata.
 interface IProjectMod is IERC721 {
-    /// @notice Sets the Chainlink CRE entrypoint address authorized to update projects.
-    /// @param _creEndpoint The address of the CRE entrypoint contract.
-    function setCreEntrypointAddress(address _creEndpoint) external;
+    /// @notice Sets the Ecobond Oracle address authorized to update projects.
+    /// @param _ecobondOracle The address of the Ecobond Oracle contract.
+    function setEcobondOracleAddress(address _ecobondOracle) external;
 
     /// @notice Adds or removes an address from the project creation whitelist.
     /// @param _account The address to whitelist or de-whitelist.
@@ -53,9 +53,9 @@ interface IProjectMod is IERC721 {
     /// @return The total supply of project tokens.
     function totalSupply() external view returns (uint256);
 
-    /// @notice Returns the address of the CRE entrypoint contract.
-    /// @return The CRE entrypoint address.
-    function getCreEntrypointAddress() external view returns (address);
+    /// @notice Returns the address of the Ecobond Oracle contract.
+    /// @return The Ecobond Oracle address.
+    function getEcobondOracleAddress() external view returns (address);
 
     /// @notice Returns the impact scores for all projects.
     /// @return An array of impact scores indexed by project order (0-indexed).
