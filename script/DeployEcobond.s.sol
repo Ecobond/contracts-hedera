@@ -50,7 +50,10 @@ contract DeployEcobond is Script {
         // Mint tokens
         usdc.mint(msg.sender, 1_000_000_000e18);
         usdc.mint(DEV_ADDRESS, 1_000_000_000e18);
-        usdc.mint(0x7D413F244A0e9A0b9C8D7F9AFA1177eE3a2837fa, 1_000_000_000e18);
+
+        // Approve and deposit
+        usdc.approve(address(investmentMod), 1_000_000_000e18);
+        investmentMod.deposit(1_000_000_000e18, msg.sender);
 
         // Create projects
         uint8 projectsCount = uint8(PROJECTS_URIS.length);
