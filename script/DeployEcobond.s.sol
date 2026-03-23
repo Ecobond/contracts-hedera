@@ -1,16 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
-import {CREentrypoint} from "../src/CREentrypoint.sol";
 import {InvestmentMod} from "../src/InvestmentMod.sol";
 import {ProjectMod} from "../src/ProjectMod.sol";
 import {USDCMock} from "../test/mock/MockUSDC.sol";
-import {CREhelper} from "./CREhelper.sol";
 import {Script} from "forge-std/Script.sol";
 
-contract DeployEcobond is Script, CREhelper {
+contract DeployEcobond is Script {
     address constant DEV_ADDRESS = 0x2fd1AFA939eFD359a302D757740d6eC15b820bC2;
-    string[12] projects = [
+    address constant ECOBOND_ORACLE_ADDRESS = 0x71ebFf4F22B1c4CeC9c4F1B9d427d165358be101;
+    string[12] PROJECTS_URIS = [
         "ipfs://bafkreib3altwckjzo2rbqucli42hes3xn4hyytnfwhxl6unctypxpop4nu",
         "ipfs://bafkreihalgtlyltl5bocf5ngea4yrg2btbd4myqn3uvjdkpd7plbplzukq",
         "ipfs://bafkreicans4wbbbzm436ssi2i5rv72z22bltfktrtdzsklrecb6qidv4wy",
@@ -27,22 +26,36 @@ contract DeployEcobond is Script, CREhelper {
 
     USDCMock usdc;
     ProjectMod projectMod;
-    CREentrypoint creEntry;
     InvestmentMod investmentMod;
 
     function run() public {
         vm.startBroadcast();
+
+        // Deploy contracts
         projectMod = new ProjectMod(msg.sender);
-        creEntry = new CREentrypoint(_getSimForwarderAddressByChainId(block.chainid), address(projectMod));
         usdc = new USDCMock();
         investmentMod = new InvestmentMod(msg.sender, address(projectMod), address(usdc));
+
+        // Set roles
         investmentMod.grantRoles(msg.sender, investmentMod.ISSUER_ROLE());
-        projectMod.setCreEntrypointAddress(address(creEntry));
+
+        // Set oracle address
+        projectMod.setEcobondOracleAddress(ECOBOND_ORACLE_ADDRESS);
+
+        // Set whitelist
         projectMod.setWhitelist(DEV_ADDRESS, true);
+        projectMod.setWhitelist(ECOBOND_ORACLE_ADDRESS, true);
         projectMod.setWhitelist(msg.sender, true);
 
-        for (uint8 i; i < projects.length; ++i) {
-            projectMod.createProject(projects[i]);
+        // Mint tokens
+        usdc.mint(msg.sender, 1_000_000_000e18);
+        usdc.mint(DEV_ADDRESS, 1_000_000_000e18);
+        usdc.mint(0x7D413F244A0e9A0b9C8D7F9AFA1177eE3a2837fa, 1_000_000_000e18);
+
+        // Create projects
+        uint8 projectsCount = uint8(PROJECTS_URIS.length);
+        for (uint8 i; i < projectsCount; ++i) {
+            projectMod.createProject(PROJECTS_URIS[i]);
         }
 
         vm.stopBroadcast();

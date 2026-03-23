@@ -19,13 +19,11 @@ graph TB
     subgraph Ecobond Platform
         IM["InvestmentMod<br/>(ERC4626 Vault)"]
         PM["ProjectMod<br/>(ERC721 Registry)"]
-        CRE["CREentrypoint<br/>(Oracle Bridge)"]
     end
 
     subgraph External
         USDC["USDC Token"]
-        CL["Chainlink CRE<br/>(Off-chain Scoring)"]
-        FW["Trusted Forwarder"]
+        EO["Ecobond Oracle Backend<br/>(Off-chain Scoring)"]
     end
 
     INV -- "deposit(USDC)" --> IM
@@ -33,9 +31,7 @@ graph TB
     IM -- "fundProject()" --> USDC
     USDC -- "Transfer to<br/>Project Owner" --> PM
     IM -- "getProjectScore()" --> PM
-    CL -- "Impact Report" --> FW
-    FW -- "onReport()" --> CRE
-    CRE -- "updateProjects()" --> PM
+    EO -- "updateProjects()" --> PM
 ```
 
 ### Dual-Token System
@@ -61,16 +57,11 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant CRE as Chainlink CRE
-    participant FW as Trusted Forwarder
-    participant EP as CREentrypoint
+    participant EO as Ecobond Oracle
     participant PM as ProjectMod
     participant IM as InvestmentMod
 
-    CRE->>FW: Encoded ProjectDetails[] report
-    FW->>EP: onReport(metadata, report)
-    EP->>EP: _decodeReport(report)
-    EP->>PM: updateProjects(ProjectDetails[])
+    EO->>PM: updateProjects(ProjectDetails[])
     PM->>PM: Store ImpactScore per project
     PM-->>PM: emit ProjectUpdated()
     Note over IM,PM: InvestmentMod queries scores for expected returns
@@ -87,7 +78,6 @@ sequenceDiagram
 |---|---|---|
 | **`ProjectMod`** | ERC721 + Enumerable + URIStorage | Project registry. Each project is an NFT with on-chain `ImpactScore` and off-chain metadata URI. |
 | **`InvestmentMod`** | ERC4626 Vault + OwnableRoles | USDC-backed vault. Investors deposit USDC for shares. Issuer funds projects. `totalAssets()` includes expected returns. |
-| **`CREentrypoint`** | ReceiverTemplate | Oracle bridge. Receives Chainlink CRE reports and forwards decoded project updates to `ProjectMod`. |
 | **`IProjectMod`** | Interface | Defines the project registry interface with `ImpactScore` and `ProjectDetails` structs. |
 
 ### Key Data Structures
@@ -126,14 +116,14 @@ graph TD
     OW["Owner (Multisig/DAO)"]
     IS["Issuer (ISSUER_ROLE)"]
     WL["Whitelisted Addresses"]
-    CR["CRE Entrypoint"]
+    EO["Ecobond Oracle"]
 
     OW -- "setWhitelist()" --> PM["ProjectMod"]
-    OW -- "setCreEntrypointAddress()" --> PM
+    OW -- "setEcobondOracleAddress()" --> PM
     OW -- "grantRoles()" --> IM["InvestmentMod"]
     IS -- "fundProject()" --> IM
     WL -- "createProject()" --> PM
-    CR -- "updateProjects()" --> PM
+    EO -- "updateProjects()" --> PM
 ```
 
 | Role | Contract | Permissions |
@@ -142,7 +132,6 @@ graph TD
 | **Owner** | `InvestmentMod` | Grant/revoke roles |
 | **Issuer** | `InvestmentMod` | Fund projects from vault |
 | **Whitelisted** | `ProjectMod` | Create new projects |
-| **CRE Entrypoint** | `ProjectMod` | Batch update project scores |
 
 ---
 
@@ -196,16 +185,11 @@ forge script script/DeployEcobond.s.sol:DeployEcobond \
 
 ```
 src/
-├── CREentrypoint.sol          # Chainlink CRE oracle bridge
 ├── InvestmentMod.sol          # ERC4626 USDC vault
 ├── ProjectMod.sol             # ERC721 project registry
 ├── interfaces/
 │   ├── IProjectMod.sol        # Project registry interface
-│   └── IReceiver.sol          # CRE receiver interface
-└── libraries/
-    └── ReceiverTemplate.sol   # Chainlink receiver base contract
 test/
-├── CREentrypoint.t.sol
 ├── InvestmentMod.t.sol
 ├── ProjectMod.t.sol
 └── mock/
@@ -218,10 +202,9 @@ script/
 
 ## Contract Addresses
 
-- ProjectMod - [0xA6c6D93C2c7393Eb91903eE5ed804c6350d1CBb0](https://sepolia.etherscan.io/address/0xA6c6D93C2c7393Eb91903eE5ed804c6350d1CBb0#code)
-- CREentrypoint - [0xE1B4C15D27Ae552FAF14A08C3b27DD46E780EA0F](https://sepolia.etherscan.io/address/0xE1B4C15D27Ae552FAF14A08C3b27DD46E780EA0F#code)
-- InvestmentMod - [0x95e8136a95eDD41EEE8d2b2Eb9FA4E6216927378](https://sepolia.etherscan.io/address/0x95e8136a95eDD41EEE8d2b2Eb9FA4E6216927378#code)
-- USDCMock - [0x395a1CDC2254c13F543c7E5728674D76A264b5B9](https://sepolia.etherscan.io/address/0x395a1CDC2254c13F543c7E5728674D76A264b5B9#code)
+- ProjectMod - [0.0.8324622-azcyc](https://hashscan.io/testnet/contract/0.0.8324622)
+- InvestmentMod - [0.0.8324627-atpkj](https://hashscan.io/testnet/contract/0.0.8324627)
+- USDCMock - [0.0.8324626-sjscs](https://hashscan.io/testnet/contract/0.0.8324626)
 
 ---
 
