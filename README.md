@@ -172,11 +172,12 @@ forge fmt
 
 ```bash
 forge script script/DeployEcobond.s.sol:DeployEcobond \
---rpc-url <RPC_URL> \
---account <KEYSTORE_ACCOUNT> \
---sender <SENDER_ADDRESS> \ #optional
+--rpc-url "https://testnet.hashio.io/api" --chain-id 296 \ # for hedera testnet
+--account <KEYSTORE_ACCOUNT> \ # cast wallet account
+--sender <SENDER_ADDRESS> \ # optional
+--legacy --slow \ # important for hedera
 --broadcast \
---verify #optional
+--verify # optional
 ```
 
 ---
