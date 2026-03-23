@@ -1,10 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+//*//////////////////////////////////////////////////////////////////////////
+//                                  IMPORTS
+//////////////////////////////////////////////////////////////////////////*//
+
+// Internal
 import {IProjectMod, ImpactScore, ProjectDetails} from "./interfaces/IProjectMod.sol";
+
+// External: OpenZeppelin
 import {ERC721, ERC721Enumerable, IERC165} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+
+// External: Solady
 import {Ownable} from "solady/auth/Ownable.sol";
+
+//*//////////////////////////////////////////////////////////////////////////
+//                                   EVENTS
+//////////////////////////////////////////////////////////////////////////*//
 
 /// @notice Emitted when a project's metadata or impact score is updated.
 /// @param projectId The ID of the project.
@@ -20,6 +33,10 @@ event EcobondOracleSet(address indexed ecobondOracle);
 /// @param account The affected address.
 /// @param status True if whitelisted, false if removed.
 event Whitelisted(address indexed account, bool status);
+
+//*//////////////////////////////////////////////////////////////////////////
+//                                   ERRORS
+//////////////////////////////////////////////////////////////////////////*//
 
 /// @notice Thrown when a function restricted to the Ecobond Oracle is called by another address.
 error NotEcobondOracle();

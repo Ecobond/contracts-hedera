@@ -1,9 +1,20 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+//*//////////////////////////////////////////////////////////////////////////
+//                                  IMPORTS
+//////////////////////////////////////////////////////////////////////////*//
+
+// Internal
 import {IProjectMod, ImpactScore, ProjectDetails} from "./interfaces/IProjectMod.sol";
+
+// External: Solady
 import {OwnableRoles} from "solady/auth/OwnableRoles.sol";
 import {ERC4626, SafeTransferLib} from "solady/tokens/ERC4626.sol";
+
+//*//////////////////////////////////////////////////////////////////////////
+//                                   ERRORS
+//////////////////////////////////////////////////////////////////////////*//
 
 /// @notice Thrown when a zero address is provided where a valid address is required.
 error ZeroAddress();
